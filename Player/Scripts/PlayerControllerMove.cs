@@ -3,31 +3,25 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
-public class PlayerControllerMove : BasePlayerMove
+
+public class PlayerControllerMove : MonoBehaviour
 {
-    [SerializeField] private Transform _groundCheck;
-    [SerializeField] private float _groundDistance = 0.4f;
-    [SerializeField] private LayerMask _groundMask;
+    [SerializeField] private GameObject _player;
+    [SerializeField] private CharacterController _playerController;
+    [SerializeField] private float _playerSpeed = 6;
 
-    private CharacterController _playerController;
-    private float _playerGravity = -9.81f;
-    private Vector3 _velocity;
+    [SerializeField] private float _gravity = 2;
 
-    bool isGrounded;
+    private Vector3 _playerVector;
     private void Start()
     {
         _playerController = GetComponent<CharacterController>();
     }
 
-    private new void Update()
+    private void Update()
     {
-        isGrounded = Physics.CheckSphere(_groundCheck.position, _groundDistance, _groundMask);
-        if (isGrounded && _velocity.y < 0) _velocity.y = -2f;
-
-        base.Update();
-        _playerController.Move(playerVector * playerSpeed * Time.deltaTime);
-
-        _velocity.y += _playerGravity * Time.deltaTime;
-        _playerController.Move(_velocity * Time.deltaTime);
+        _playerVector = (transform.right * Input.GetAxis("Horizontal") + Input.GetAxis("Vertical") * transform.forward).normalized;
+        _playerVector -= (transform.up * _gravity * Time.deltaTime).normalized;
+        _playerController.Move(_playerVector * _playerSpeed * Time.deltaTime);
     }
 }
