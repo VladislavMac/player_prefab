@@ -1,9 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 
-public class BasePlayerCameraRotation : MonoBehaviour
+public class CameraController : MonoBehaviour
 {
     [SerializeField]
     protected float sensitivity = 1.5f;
@@ -23,17 +22,24 @@ public class BasePlayerCameraRotation : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
     }
 
-    protected void Update()
+    private void FixedUpdate()
     {
-        YRotation += Input.GetAxis("Mouse X") * sensitivity; 
-        XRotation -= Input.GetAxis("Mouse Y") * sensitivity; 
+        CharacterRotate();
+    }
+
+    private void Update()
+    {
+        YRotation += Input.GetAxis("Mouse X") * sensitivity;
+        XRotation -= Input.GetAxis("Mouse Y") * sensitivity;
 
         XRotation = Mathf.Clamp(XRotation, -90f, 90f);
+
+        CharacterRotate();
     }
-        
-    protected void CharacterRotate()
+
+    private void CharacterRotate()
     {
         transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(XRotation, YRotation, 0), Time.deltaTime * smooth);
-        character.rotation = Quaternion.Lerp(character.rotation, Quaternion.Euler(0, YRotation, 0), Time.deltaTime * smooth );
+        character.rotation = Quaternion.Euler(0, YRotation, 0);
     }
 }
