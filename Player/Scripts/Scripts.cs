@@ -23,7 +23,7 @@ public class FPSController : MonoBehaviour
     private float _rotationX = 0;
     private float _movementDirectionY;
     
-    private bool _isRunning;
+    private bool _isPlayerRunning;
     private bool _isPlayerJumping;
     private bool _isPlayerGrounded;
     private bool _isPlayerCanMove = true;
@@ -48,8 +48,8 @@ public class FPSController : MonoBehaviour
 
         _movementDirectionY = moveDirection.y;
 
-        _isRunning = Input.GetKey(KeyCode.LeftShift);
-        _isPlayerJumping = Input.GetKey(KeyCode.Space);
+        _isPlayerRunning = Input.GetKey(KeyCode.LeftShift);
+        _isPlayerJumping = Input.GetKeyDown(KeyCode.Space);
 
         if( _isPlayerCanMove )
         {
@@ -61,7 +61,7 @@ public class FPSController : MonoBehaviour
 
     private void PlayerStatesControl(Vector3 forward, Vector3 right)
     {
-        PlayerWalking(forward, right, (_isRunning ? _runningSpeed : _walkingSpeed));
+        PlayerWalking(forward, right, (_isPlayerRunning ? _runningSpeed : _walkingSpeed));
         PlayerJump();
         PlayerCamera();
     }
