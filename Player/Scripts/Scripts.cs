@@ -76,7 +76,10 @@ public class FPSController : MonoBehaviour
         {
             moveDirection.y = _jumpSpeed;
         }
-
+        else
+        {
+            moveDirection.y = _movementDirectionY;
+        }
 
         characterController.Move(moveDirection * Time.deltaTime);
     }
