@@ -7,16 +7,15 @@ using UnityEngine;
 
 public class FPSController : MonoBehaviour
 {
-    [SerializeField] private float _walkingSpeed = 4.5f;
-    [SerializeField] private float _runningSpeed = 6.5f;
-    [SerializeField] private float _jumpSpeed = 8.0f;
+    [SerializeField] private float _walkingSpeed = 3.5f;
+    [SerializeField] private float _runningSpeed = 6.0f;
+    [SerializeField] private float _jumpSpeed = 5.0f;
     [SerializeField] private float _gravity = 20.0f;
 
     [SerializeField] private Camera _playerCamera;
-    [SerializeField] private GameObject _playerFoot;
 
     [SerializeField] private float _lookSpeed = 2.0f;
-    [SerializeField] private float _lookXLimit = 45.0f;
+    [SerializeField] private float _lookXLimit = 90.0f;
 
     CharacterController characterController;
     Vector3 moveDirection = Vector3.zero;
@@ -24,11 +23,10 @@ public class FPSController : MonoBehaviour
     private float _rotationX = 0;
     private float _movementDirectionY;
     
-    private bool  _canMove = true;
-
     private bool _isRunning;
     private bool _isPlayerJumping;
     private bool _isPlayerGrounded;
+    private bool _isPlayerCanMove = true;
 
     private void Start()
     {
@@ -40,41 +38,57 @@ public class FPSController : MonoBehaviour
 
     private void Update()
     {
+        PlayerStates();
+    }
+
+    private void PlayerStates()
+    {
         Vector3 forward = transform.TransformDirection(Vector3.forward);
-        Vector3 right   = transform.TransformDirection(Vector3.right);
+        Vector3 right = transform.TransformDirection(Vector3.right);
 
         _movementDirectionY = moveDirection.y;
 
-        _isRunning       = Input.GetKey(KeyCode.LeftShift);
+        _isRunning = Input.GetKey(KeyCode.LeftShift);
         _isPlayerJumping = Input.GetKey(KeyCode.Space);
 
-        PlayerGrounded();
-        PlayerWalking(forward, right);
+        if( _isPlayerCanMove )
+        {
+            PlayerStatesControl(forward, right);
+        }
+
+        PlayerStatesPhysical(forward, right);
+    }
+
+    private void PlayerStatesControl(Vector3 forward, Vector3 right)
+    {
+        PlayerWalking(forward, right, (_isRunning ? _runningSpeed : _walkingSpeed));
         PlayerJump();
-        PlayerGravity();
         PlayerCamera();
     }
 
-    private void PlayerWalking(Vector3 forward, Vector3 right)
+    private void PlayerStatesPhysical(Vector3 forward, Vector3 right)
     {
-        float curSpeedX = _canMove ? Input.GetAxisRaw("Vertical") : 0;
-        float curSpeedY = _canMove ? Input.GetAxisRaw("Horizontal") : 0;
+        PlayerGrounded();
+        PlayerGravity();
+    }
+
+    private void PlayerWalking(Vector3 forward, Vector3 right, float playerSpeed)
+    {
+        float curSpeedX = Input.GetAxisRaw("Vertical");
+        float curSpeedY = Input.GetAxisRaw("Horizontal");
 
         moveDirection = ((forward * curSpeedX) + (right * curSpeedY)).normalized;
 
-        characterController.Move(moveDirection * (_isRunning ? _runningSpeed : _walkingSpeed) * Time.deltaTime);
+        characterController.Move(moveDirection * playerSpeed * Time.deltaTime);
     }
 
     private void PlayerCamera()
     {
-        if (_canMove)
-        {
-            _rotationX += -Input.GetAxis("Mouse Y") * _lookSpeed;
-            _rotationX = Mathf.Clamp(_rotationX, -_lookXLimit, _lookXLimit);
+        _rotationX += -Input.GetAxis("Mouse Y") * _lookSpeed;
+        _rotationX = Mathf.Clamp(_rotationX, -_lookXLimit, _lookXLimit);
 
-            _playerCamera.transform.localRotation = Quaternion.Euler(_rotationX, 0, 0);
-            transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * _lookSpeed, 0);
-        }
+        _playerCamera.transform.localRotation = Quaternion.Euler(_rotationX, 0, 0);
+        transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * _lookSpeed, 0);
     }
 
     private void PlayerJump()
@@ -93,10 +107,6 @@ public class FPSController : MonoBehaviour
 
     private void PlayerGravity()
     {
-        // Примените силу тяжести. Сила тяжести умножается на deltaTime дважды (один раз здесь и один раз ниже
-        // когда направление перемещения умножается на deltaTime). Это потому, что должна быть применена сила тяжести
-        // как ускорение (мс^-2)
-
         if (!_isPlayerGrounded)
         {
             moveDirection.y -= _gravity * Time.deltaTime;
