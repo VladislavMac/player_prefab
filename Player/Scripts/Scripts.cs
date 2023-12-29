@@ -13,6 +13,7 @@ public class FPSController : MonoBehaviour
     [SerializeField] private float _gravity = 20.0f;
 
     [SerializeField] private Camera _playerCamera;
+    [SerializeField] private GameObject _playerFoot;
 
     [SerializeField] private float _lookSpeed = 2.0f;
     [SerializeField] private float _lookXLimit = 45.0f;
@@ -22,9 +23,12 @@ public class FPSController : MonoBehaviour
 
     private float _rotationX = 0;
     private float _movementDirectionY;
-
+    
     private bool  _canMove = true;
-    private bool  _isRunning;
+
+    private bool _isRunning;
+    private bool _isPlayerJumping;
+    private bool _isPlayerGrounded;
 
     private void Start()
     {
@@ -39,9 +43,12 @@ public class FPSController : MonoBehaviour
         Vector3 forward = transform.TransformDirection(Vector3.forward);
         Vector3 right   = transform.TransformDirection(Vector3.right);
 
-        _isRunning = Input.GetKey(KeyCode.LeftShift);
         _movementDirectionY = moveDirection.y;
 
+        _isRunning       = Input.GetKey(KeyCode.LeftShift);
+        _isPlayerJumping = Input.GetKey(KeyCode.Space);
+
+        PlayerGrounded();
         PlayerWalking(forward, right);
         PlayerJump();
         PlayerGravity();
@@ -72,7 +79,7 @@ public class FPSController : MonoBehaviour
 
     private void PlayerJump()
     {
-        if (Input.GetButton("Jump") && characterController.isGrounded)
+        if (_isPlayerJumping && _isPlayerGrounded)
         {
             moveDirection.y = _jumpSpeed;
         }
@@ -90,11 +97,23 @@ public class FPSController : MonoBehaviour
         // когда направление перемещения умножается на deltaTime). Это потому, что должна быть применена сила тяжести
         // как ускорение (мс^-2)
 
-        if (!characterController.isGrounded)
+        if (!_isPlayerGrounded)
         {
             moveDirection.y -= _gravity * Time.deltaTime;
         }
 
         characterController.Move(moveDirection * Time.deltaTime);
+    }
+
+    private void PlayerGrounded()
+    {
+        if (Physics.Raycast(transform.position, Vector3.down, 1.4f))
+        {
+            _isPlayerGrounded = true;
+        }
+        else
+        {
+            _isPlayerGrounded = false;
+        }
     }
 }
