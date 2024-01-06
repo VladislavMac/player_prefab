@@ -17,6 +17,7 @@ public class Controller : MonoBehaviour
     [SerializeField] private Camera _playerCamera;
 
     private CharacterController _characterController;
+
     private Vector3 _moveDirection     = Vector3.zero;
     private Vector3 _velocityDirection = Vector3.zero;
 
