@@ -74,8 +74,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2fa2bc28989d38e4f94148def0369b03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _playerWalkSpeed: 3.5
-  _playerRunSpeed: 6
+  _playerSpeedWalk: 3.5
+  _playerSpeedRun: 6
+  _playerSpeedCrouching: 2
   _playerJumpHeight: 8
   _gravity: 30
   _playerCamera: {fileID: 6470595903352679513}
