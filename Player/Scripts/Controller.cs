@@ -5,7 +5,7 @@ using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
 
-public class FPSController : MonoBehaviour
+public class Controller : MonoBehaviour
 {
     [SerializeField] private float _playerSpeedWalk = 3.5f;
     [SerializeField] private float _playerSpeedRun = 6.0f;
@@ -16,22 +16,15 @@ public class FPSController : MonoBehaviour
 
     [SerializeField] private Camera _playerCamera;
 
-    [SerializeField] private float _lookSpeed = 2.0f;
-
     private CharacterController _characterController;
-    Vector3 moveDirection     = Vector3.zero;
-    Vector3 velocityDirection = Vector3.zero;
-
-    private float _movementDirectionY;
+    private Vector3 _moveDirection     = Vector3.zero;
+    private Vector3 _velocityDirection = Vector3.zero;
 
     private float _playerCrouchHeight = 1f;
     private float _playerHeight = 2.0f;
     private float _playerSpeed;
 
     private float _velocity;
-
-    private float _rotationX = 0;
-    private float _lookXLimit = 90.0f;
 
     private bool _isPlayerRunning;
     private bool _isPlayerJumping;
@@ -42,9 +35,6 @@ public class FPSController : MonoBehaviour
     private void Start()
     {
         _characterController = GetComponent<CharacterController>();
-        
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
     }
 
     private void Update()
@@ -55,9 +45,7 @@ public class FPSController : MonoBehaviour
     private void PlayerStates()
     {
         Vector3 forward = transform.TransformDirection(Vector3.forward);
-        Vector3 right = transform.TransformDirection(Vector3.right);
-
-        _movementDirectionY = moveDirection.y;
+        Vector3 right   = transform.TransformDirection(Vector3.right);
 
         _isPlayerRunning   = Input.GetKey(KeyCode.LeftShift);
         _isPlayerCrouching = Input.GetKey(KeyCode.LeftControl);
@@ -84,17 +72,15 @@ public class FPSController : MonoBehaviour
         {
             DoGravity();
         }
-
-        PlayerCamera();
     }
     private void PlayerMove(Vector3 forward, Vector3 right)
     {
         float curSpeedX = Input.GetAxisRaw("Vertical");
         float curSpeedY = Input.GetAxisRaw("Horizontal");
 
-        moveDirection = ((forward * curSpeedX) + (right * curSpeedY)).normalized * _playerSpeed;
+        _moveDirection = ((forward * curSpeedX) + (right * curSpeedY)).normalized * _playerSpeed;
 
-        _characterController.Move(moveDirection * Time.deltaTime);
+        _characterController.Move(_moveDirection * Time.deltaTime);
     }
 
     private void PlayerJump()
@@ -133,8 +119,8 @@ public class FPSController : MonoBehaviour
     }
     private void DoGravity()
     {
-        velocityDirection.y = _velocity;
-        _characterController.Move(velocityDirection * Time.deltaTime);
+        _velocityDirection.y = _velocity;
+        _characterController.Move(_velocityDirection * Time.deltaTime);
     }
     
     private void ControllPlayerGrounded()
@@ -159,14 +145,5 @@ public class FPSController : MonoBehaviour
         {
             _playerSpeed = _playerSpeedCrouching;
         }
-    }
-
-    private void PlayerCamera()
-    {
-        _rotationX += -Input.GetAxis("Mouse Y") * _lookSpeed;
-        _rotationX = Mathf.Clamp(_rotationX, -_lookXLimit, _lookXLimit);
-
-        _playerCamera.transform.localRotation = Quaternion.Euler(_rotationX, 0, 0);
-        transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * _lookSpeed, 0);
     }
 }
