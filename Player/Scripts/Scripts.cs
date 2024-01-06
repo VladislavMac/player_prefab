@@ -59,34 +59,36 @@ public class FPSController : MonoBehaviour
         _isPlayerCrouching = Input.GetKey(KeyCode.LeftControl);
         _isPlayerJumping   = Input.GetKeyDown(KeyCode.Space);
 
-        if( _isPlayerCanMove )
+        PlayerGrounded();
+
+        if ( _isPlayerCanMove )
         {
             PlayerStatesControl(forward, right);
         }
-
-        PlayerStatesPhysical(forward, right);
     }
 
     private void PlayerStatesControl(Vector3 forward, Vector3 right)
     {
         PlayerMove(forward, right, (_isPlayerRunning ? _playerRunSpeed : _playerWalkSpeed));
-        PlayerJump();
+
         PlayerCrouch(_playerCamera);
         PlayerGravity();
+        PlayerJump();
+
+        if( _gravity != 0)
+        {
+            DoGravity();
+        }
+
         PlayerCamera();
-
     }
-    private void PlayerStatesPhysical(Vector3 forward, Vector3 right)
-    {
-        PlayerGrounded();
-    }
-
     private void PlayerMove(Vector3 forward, Vector3 right, float playerSpeed)
     {
         float curSpeedX = Input.GetAxisRaw("Vertical");
         float curSpeedY = Input.GetAxisRaw("Horizontal");
 
         moveDirection = ((forward * curSpeedX) + (right * curSpeedY)).normalized * playerSpeed;
+
         _characterController.Move(moveDirection * Time.deltaTime);
     }
 
@@ -94,14 +96,8 @@ public class FPSController : MonoBehaviour
     {
         if (_isPlayerJumping && !_isPlayerCrouching && _isPlayerGrounded)
         {
-            Debug.Log("Hello");
             _velocity += _playerJumpHeight;
         }
-        //else
-        //{
-        //    moveDirection.y = _movementDirectionY;
-        //}
-
     }
     private void PlayerCrouch(Camera playerCamera)
     {
@@ -129,16 +125,13 @@ public class FPSController : MonoBehaviour
         {
             _velocity = -1.0f;
         }
-        if (_isPlayerJumping && !_isPlayerCrouching && _isPlayerGrounded)
-        {
-            Debug.Log("Hello");
-            _velocity += _playerJumpHeight;
-        }
-
+    }
+    private void DoGravity()
+    {
         velocityDirection.y = _velocity;
         _characterController.Move(velocityDirection * Time.deltaTime);
     }
-
+    
     private void PlayerGrounded()
     {
         if (Physics.Raycast(transform.position, Vector3.down, _playerHeight * 0.5f * 0.1f) || _characterController.isGrounded)
